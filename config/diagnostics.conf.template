@@ -1,0 +1,57 @@
+# DASH LTPA Integration Diagnostics - Configuration Template
+# Copy this file to diagnostics.conf and edit values
+
+# ==============================================================================
+# WebSphere Configuration
+# ==============================================================================
+WAS_HOME="/opt/IBM/WebSphere/AppServer"
+WAS_LOG_DIR="${WAS_HOME}/profiles/AppSrv01/logs/server1"
+
+# ==============================================================================
+# DASH Configuration
+# ==============================================================================
+# URL to DASH role-fetching servlet (or any LTPA-protected endpoint)
+DASH_URL="https://dash.example.com:9443/dash/api/roles"
+
+# Credentials for LTPA token acquisition (optional if you provide token directly)
+DASH_USERNAME=""
+DASH_PASSWORD=""
+
+# Pre-acquired LTPA token (LTPAToken2 cookie value)
+# If set, username/password are not needed
+LTPA_TOKEN=""
+
+# ==============================================================================
+# OpenShift Configuration (for clock skew detection with TCE pod)
+# ==============================================================================
+OPENSHIFT_NAMESPACE="tce-namespace"
+OPENSHIFT_POD="tce-app-pod-xxxxx"
+
+# ==============================================================================
+# Remote Host Configuration (alternative to OpenShift)
+# ==============================================================================
+# Use this if testing clock skew with a non-OpenShift remote host
+REMOTE_HOST=""
+REMOTE_USER=""
+
+# ==============================================================================
+# Stress Test Configuration
+# ==============================================================================
+# Test mode: steady (constant rate), burst (concurrent), soak (long duration)
+STRESS_MODE="steady"
+
+# Test duration in seconds (for steady/soak modes)
+STRESS_DURATION="60"
+
+# Requests per second (for steady mode)
+STRESS_RATE="10"
+
+# Disable SSL verification (ONLY for testing with self-signed certs)
+# Set to "true" to disable (not recommended for production)
+STRESS_NO_VERIFY_SSL=""
+
+# ==============================================================================
+# Event Correlation Configuration
+# ==============================================================================
+# Time window in minutes for correlating log events with failures
+CORRELATION_WINDOW="5"
