@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Test Role Fetch - LTPA Token Tester{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Test DASH Role Fetch</h2>
+
+    <div class="alert alert-info">
+        <strong>ℹ️ Simulating TCE Integration:</strong>
+        <p style="margin-top: 10px;">
+            This test simulates how the OpenShift TCE application calls DASH to fetch user roles.
+            It sends your LTPA token to the specified endpoint and displays the response.
+        </p>
+    </div>
+
+    <form method="POST" action="{{ url_for('test_role_fetch') }}">
+        <div class="form-group">
+            <label for="endpoint">DASH Endpoint:</label>
+            <input type="text" id="endpoint" name="endpoint"
+                   value="{{ default_endpoint }}"
+                   placeholder="/dash/api/roles">
+            <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                Endpoint path (will be appended to {{ dash_url }})
+            </div>
+        </div>
+
+        <button type="submit" class="btn">Send Request</button>
+    </form>
+</div>
+
+{% if result %}
+<div class="card">
+    <h2>Test Result</h2>
+
+    {% if result.success %}
+        <div class="alert alert-success">
+            <strong>✓ Request Successful</strong>
+            <p style="margin-top: 10px;">LTPA token was accepted by DASH.</p>
+        </div>
+    {% else %}
+        <div class="alert alert-error">
+            <strong>✗ Request Failed</strong>
+            <p style="margin-top: 10px;">
+                {% if result.error %}
+                    {{ result.error }}
+                {% else %}
+                    HTTP {{ result.status_code }}: {{ result.status_text }}
+                {% endif %}
+            </p>
+        </div>
+    {% endif %}
+
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-label">Status Code</div>
+            <div class="stat-value" style="color: {% if result.success %}#28a745{% else %}#dc3545{% endif %}">
+                {{ result.status_code or 'N/A' }}
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Response Time</div>
+            <div class="stat-value">{{ result.response_time_ms }}ms</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Timestamp</div>
+            <div class="stat-value" style="font-size: 14px;">{{ result.timestamp }}</div>
+        </div>
+    </div>
+
+    {% if result.headers %}
+    <h3 style="margin: 20px 0 10px 0; font-size: 16px;">Response Headers:</h3>
+    <div class="code-block">
+        {% for key, value in result.headers.items() %}
+        <strong>{{ key }}:</strong> {{ value }}<br>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if result.json_data %}
+    <h3 style="margin: 20px 0 10px 0; font-size: 16px;">JSON Response:</h3>
+    <div class="code-block">
+        {{ result.json_data | tojson(indent=2) }}
+    </div>
+    {% elif result.body %}
+    <h3 style="margin: 20px 0 10px 0; font-size: 16px;">Response Body:</h3>
+    <div class="code-block">
+        {{ result.body }}
+    </div>
+    {% endif %}
+
+    <div style="margin-top: 20px;">
+        <h3 style="margin: 0 0 10px 0; font-size: 16px;">Request Details:</h3>
+        <div class="info-grid">
+            <div class="info-label">URL:</div>
+            <div class="info-value">{{ result.url }}</div>
+
+            <div class="info-label">Method:</div>
+            <div class="info-value">GET</div>
+
+            <div class="info-label">Cookie Sent:</div>
+            <div class="info-value">LTPAToken2=&lt;token&gt;</div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="card">
+    <h2>Troubleshooting Guide</h2>
+
+    <div style="line-height: 1.8;">
+        <h3 style="font-size: 16px; margin-bottom: 10px;">Common Issues:</h3>
+
+        <div style="margin: 15px 0;">
+            <strong>HTTP 401 Unauthorized:</strong>
+            <ul style="margin-left: 20px;">
+                <li>LTPA token has expired (default: 120 minutes)</li>
+                <li>Token signature validation failed</li>
+                <li>Clock skew between client and server</li>
+            </ul>
+        </div>
+
+        <div style="margin: 15px 0;">
+            <strong>HTTP 403 Forbidden:</strong>
+            <ul style="margin-left: 20px;">
+                <li>User lacks required role for endpoint</li>
+                <li>Security constraint configured on endpoint</li>
+            </ul>
+        </div>
+
+        <div style="margin: 15px 0;">
+            <strong>HTTP 404 Not Found:</strong>
+            <ul style="margin-left: 20px;">
+                <li>Endpoint path is incorrect</li>
+                <li>Application not deployed or not started</li>
+            </ul>
+        </div>
+
+        <div style="margin: 15px 0;">
+            <strong>Connection/SSL Errors:</strong>
+            <ul style="margin-left: 20px;">
+                <li>DASH server unreachable</li>
+                <li>Certificate validation failure</li>
+                <li>Firewall blocking connection</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

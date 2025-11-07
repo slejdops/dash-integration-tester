@@ -44,6 +44,14 @@ This tool addresses critical, intermittent issues in production JazzSM DASH envi
 - Provides actionable remediation steps
 - Exports JSON data for integration with monitoring systems
 
+### 6. Interactive Web Application (NEW!)
+- **Browser-based LTPA token testing** - No command-line needed
+- **Visual dashboard** - See token status and test results in real-time
+- **Login integration** - Acquire LTPA tokens directly from DASH
+- **One-click testing** - Test role-fetching endpoints with a button
+- **Mini stress tests** - Run quick load tests from the browser
+- **Dockerized deployment** - Run with `docker-compose up`
+
 ## Architecture
 
 ```
@@ -61,10 +69,16 @@ dash-integration-tester/
 │   │   └── correlation.py       # Event correlation
 │   └── stress_tester/
 │       └── ltpa_simulator.py    # LTPA token tester
+├── webapp/                       # NEW: Interactive web application
+│   ├── app.py                    # Flask application
+│   ├── templates/                # HTML templates
+│   ├── Dockerfile               # Container image
+│   └── requirements.txt          # Python dependencies
 ├── utils/
 │   └── clock_skew_detector.py   # Clock synchronization checker
 ├── config/
 │   └── diagnostics.conf         # Configuration file
+├── docker-compose.yml           # NEW: Web app deployment
 └── docs/
     ├── ARCHITECTURE.md           # Detailed architecture
     ├── DIAGNOSTIC_STRATEGY.md    # Quick start troubleshooting
@@ -112,6 +126,35 @@ vi config/diagnostics.conf
 # Run stress test only
 ./bin/run_diagnostics.sh --mode stress
 ```
+
+### Web Application Quick Start
+
+For an interactive, browser-based testing experience:
+
+```bash
+# 1. Start the web application with Docker Compose
+docker-compose up -d
+
+# 2. Access the web interface
+open http://localhost:5000
+
+# 3. Choose how to get started:
+#    - Login to DASH (automatic token acquisition)
+#    - Or manually paste an LTPA token
+#
+# 4. Start testing:
+#    - View token details
+#    - Test role-fetching endpoint
+#    - Run mini stress tests
+```
+
+The web app provides:
+- Visual dashboard with real-time results
+- No command-line knowledge required
+- Perfect for quick validation after configuration changes
+- Interactive debugging of LTPA token issues
+
+See [webapp/README.md](webapp/README.md) for detailed web app documentation.
 
 ## Detailed Usage
 

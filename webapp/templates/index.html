@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - LTPA Token Tester{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Dashboard</h2>
+
+    {% if has_token %}
+        <div class="alert alert-success">
+            <strong>✓ LTPA Token Active</strong>
+            <p style="margin-top: 10px;">You have an active LTPA token. You can now test DASH integration.</p>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-label">Token Preview:</div>
+            <div class="info-value"><code>{{ token_preview }}</code></div>
+
+            <div class="info-label">Timestamp:</div>
+            <div class="info-value">{{ timestamp }}</div>
+
+            <div class="info-label">DASH Server:</div>
+            <div class="info-value">{{ dash_url }}</div>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <h3 style="margin-bottom: 15px;">What would you like to do?</h3>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <a href="{{ url_for('token_info') }}" class="btn">View Token Details</a>
+                <a href="{{ url_for('test_role_fetch') }}" class="btn">Test Role Fetch</a>
+                <a href="{{ url_for('stress_test') }}" class="btn">Run Stress Test</a>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-warning">
+            <strong>⚠ No LTPA Token</strong>
+            <p style="margin-top: 10px;">You need to acquire an LTPA token before testing.</p>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <h3 style="margin-bottom: 15px;">Get Started</h3>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <a href="{{ url_for('login') }}" class="btn">Login to DASH</a>
+                <a href="{{ url_for('manual_token') }}" class="btn btn-secondary">Enter Token Manually</a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>About This Tool</h2>
+    <p style="margin-bottom: 15px;">
+        This web application allows you to interactively test LTPA token authentication with DASH/WebSphere.
+    </p>
+
+    <h3 style="margin: 20px 0 10px 0; font-size: 16px;">Features:</h3>
+    <ul style="margin-left: 20px; line-height: 1.8;">
+        <li>Acquire LTPA tokens by logging into DASH</li>
+        <li>View and inspect token details</li>
+        <li>Test role-fetching endpoints (simulating TCE integration)</li>
+        <li>Run mini stress tests to reproduce intermittent failures</li>
+        <li>Inspect request/response details for debugging</li>
+    </ul>
+
+    <h3 style="margin: 20px 0 10px 0; font-size: 16px;">Use Cases:</h3>
+    <ul style="margin-left: 20px; line-height: 1.8;">
+        <li>Validate LTPA token acquisition and propagation</li>
+        <li>Test DASH endpoints with real LTPA tokens</li>
+        <li>Debug cookie domain/path issues</li>
+        <li>Reproduce intermittent authentication failures</li>
+        <li>Verify SSO configuration changes</li>
+    </ul>
+</div>
+{% endblock %}

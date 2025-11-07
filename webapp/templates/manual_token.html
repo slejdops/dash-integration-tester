@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Manual Token - LTPA Token Tester{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Enter LTPA Token Manually</h2>
+
+    {% if error %}
+        <div class="alert alert-error">
+            <strong>Error</strong>
+            <p style="margin-top: 10px;">{{ error }}</p>
+        </div>
+    {% endif %}
+
+    <div class="alert alert-info">
+        <strong>ℹ️ How to get an LTPA token:</strong>
+        <ol style="margin: 10px 0 0 20px; line-height: 1.8;">
+            <li>Login to DASH via web browser</li>
+            <li>Open Browser DevTools (F12)</li>
+            <li>Go to Application → Cookies</li>
+            <li>Find <code>LTPAToken2</code> cookie</li>
+            <li>Copy the value and paste it below</li>
+        </ol>
+    </div>
+
+    <form method="POST" action="{{ url_for('manual_token') }}">
+        <div class="form-group">
+            <label for="token">LTPA Token (LTPAToken2 cookie value):</label>
+            <textarea id="token" name="token" required autofocus
+                      placeholder="Paste LTPA token here (e.g., AAECAzQ3ODA...)"></textarea>
+            <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                Token should start with "AAECA..." or similar base64 string
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <button type="submit" class="btn">Set Token</button>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+
+    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+        <h3 style="font-size: 16px; margin-bottom: 10px;">Alternative Methods:</h3>
+
+        <div class="code-block">
+# Using curl to extract token:<br>
+curl -v -k -c cookies.txt -X POST \<br>
+  "https://dash.example.com:9443/ibm/console/login.do" \<br>
+  -d "username=admin&password=password&action=Log in"<br>
+<br>
+grep LTPAToken2 cookies.txt
+        </div>
+    </div>
+</div>
+{% endblock %}

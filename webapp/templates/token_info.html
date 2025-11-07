@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Token Info - LTPA Token Tester{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>LTPA Token Information</h2>
+
+    {% if token.appears_valid %}
+        <div class="alert alert-success">
+            <strong>✓ Token appears valid</strong>
+            <p style="margin-top: 10px;">Basic validation passed. Use "Test Role Fetch" to verify with DASH.</p>
+        </div>
+    {% else %}
+        <div class="alert alert-warning">
+            <strong>⚠ Token may be invalid</strong>
+            <p style="margin-top: 10px;">Token format does not match expected LTPA structure.</p>
+        </div>
+    {% endif %}
+
+    <div class="info-grid">
+        <div class="info-label">Username:</div>
+        <div class="info-value">{{ token.username }}</div>
+
+        <div class="info-label">Acquired At:</div>
+        <div class="info-value">{{ token.acquired_at }}</div>
+
+        <div class="info-label">Token Length:</div>
+        <div class="info-value">{{ token.length }} characters</div>
+
+        {% if token.base64_decoded_length %}
+        <div class="info-label">Decoded Length:</div>
+        <div class="info-value">{{ token.base64_decoded_length }} bytes</div>
+        {% endif %}
+    </div>
+
+    <h3 style="margin: 30px 0 15px 0; font-size: 18px;">Full Token Value:</h3>
+    <div class="code-block" style="word-break: break-all;">
+        {{ token.token }}
+    </div>
+
+    <div class="alert alert-info" style="margin-top: 20px;">
+        <strong>ℹ️ About LTPA Tokens:</strong>
+        <ul style="margin: 10px 0 0 20px; line-height: 1.8;">
+            <li>LTPA tokens are encrypted and signed by WebSphere</li>
+            <li>They contain user identity, expiration time, and signature</li>
+            <li>Cannot be decoded without LTPA private key</li>
+            <li>Typical lifetime: 120 minutes (configurable)</li>
+            <li>Stored in <code>LTPAToken2</code> cookie</li>
+        </ul>
+    </div>
+
+    <div style="margin-top: 30px; display: flex; gap: 10px;">
+        <a href="{{ url_for('test_role_fetch') }}" class="btn">Test This Token</a>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</div>
+
+{% if token.decode_error %}
+<div class="card">
+    <h2>Decode Error</h2>
+    <div class="alert alert-error">
+        <strong>Base64 Decode Error:</strong>
+        <p style="margin-top: 10px;">{{ token.decode_error }}</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

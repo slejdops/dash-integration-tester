@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Stress Test - LTPA Token Tester{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>LTPA Integration Stress Test</h2>
+
+    <div class="alert alert-info">
+        <strong>ℹ️ About Stress Testing:</strong>
+        <p style="margin-top: 10px;">
+            This test sends multiple requests to DASH with your LTPA token to identify intermittent failures.
+            Useful for reproducing issues that only occur under load or specific timing conditions.
+        </p>
+    </div>
+
+    {% if not results %}
+    <form method="POST" action="{{ url_for('stress_test') }}">
+        <div class="form-group">
+            <label for="endpoint">DASH Endpoint:</label>
+            <input type="text" id="endpoint" name="endpoint"
+                   value="{{ default_endpoint }}"
+                   placeholder="/dash/api/roles">
+        </div>
+
+        <div class="form-group">
+            <label for="num_requests">Number of Requests:</label>
+            <input type="number" id="num_requests" name="num_requests"
+                   value="10" min="1" max="100">
+            <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                Maximum: 100 requests (use command-line tool for larger tests)
+            </div>
+        </div>
+
+        <button type="submit" class="btn">Run Stress Test</button>
+    </form>
+    {% endif %}
+</div>
+
+{% if results %}
+<div class="card">
+    <h2>Stress Test Results</h2>
+
+    {% if results.failure_rate > 1 %}
+        <div class="alert alert-error">
+            <strong>⚠ Failures Detected</strong>
+            <p style="margin-top: 10px;">
+                {{ results.failure_rate }}% of requests failed. This indicates an issue with LTPA token validation or DASH availability.
+            </p>
+        </div>
+    {% elif results.failure_rate > 0 %}
+        <div class="alert alert-warning">
+            <strong>⚠ Minor Failures</strong>
+            <p style="margin-top: 10px;">
+                {{ results.failure_rate }}% failure rate detected. This may be transient network issues.
+            </p>
+        </div>
+    {% else %}
+        <div class="alert alert-success">
+            <strong>✓ All Requests Successful</strong>
+            <p style="margin-top: 10px;">
+                100% success rate. LTPA token is working correctly.
+            </p>
+        </div>
+    {% endif %}
+
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-label">Total Requests</div>
+            <div class="stat-value">{{ results.total_requests }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Successful</div>
+            <div class="stat-value" style="color: #28a745;">{{ results.successful }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Failed</div>
+            <div class="stat-value" style="color: {% if results.failed > 0 %}#dc3545{% else %}#28a745{% endif %}">
+                {{ results.failed }}
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Failure Rate</div>
+            <div class="stat-value" style="color: {% if results.failure_rate > 1 %}#dc3545{% elif results.failure_rate > 0 %}#ffc107{% else %}#28a745{% endif %}">
+                {{ results.failure_rate }}%
+            </div>
+        </div>
+    </div>
+
+    <h3 style="margin: 30px 0 15px 0; font-size: 18px;">Response Time Statistics</h3>
+
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-label">Average</div>
+            <div class="stat-value" style="font-size: 20px;">{{ results.avg_response_time }}ms</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Minimum</div>
+            <div class="stat-value" style="font-size: 20px;">{{ results.min_response_time }}ms</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Maximum</div>
+            <div class="stat-value" style="font-size: 20px;">{{ results.max_response_time }}ms</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">P95</div>
+            <div class="stat-value" style="font-size: 20px;">{{ results.p95_response_time }}ms</div>
+        </div>
+    </div>
+
+    {% if results.failures %}
+    <h3 style="margin: 30px 0 15px 0; font-size: 18px;">Failure Details</h3>
+
+    <div class="alert alert-error">
+        <strong>{{ results.failures|length }} request(s) failed:</strong>
+    </div>
+
+    {% for failure in results.failures[:10] %}
+    <div class="code-block" style="margin: 10px 0;">
+        <strong>Request #{{ failure.request_num }}:</strong><br>
+        {% if failure.status_code %}
+        Status: HTTP {{ failure.status_code }} - {{ failure.error }}<br>
+        {% else %}
+        Error: {{ failure.error }}<br>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    {% if results.failures|length > 10 %}
+    <p style="color: #666; font-style: italic;">
+        Showing first 10 of {{ results.failures|length }} failures
+    </p>
+    {% endif %}
+    {% endif %}
+
+    <div class="info-grid" style="margin-top: 30px;">
+        <div class="info-label">Test Duration:</div>
+        <div class="info-value">{{ results.start_time }} to {{ results.end_time }}</div>
+    </div>
+
+    <div style="margin-top: 30px; display: flex; gap: 10px;">
+        <a href="{{ url_for('stress_test') }}" class="btn">Run Another Test</a>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Interpreting Results</h2>
+
+    <div style="line-height: 1.8;">
+        <h3 style="font-size: 16px; margin-bottom: 10px;">Failure Rate Guidelines:</h3>
+        <ul style="margin-left: 20px;">
+            <li><strong>0%:</strong> Excellent - No issues detected</li>
+            <li><strong>< 0.1%:</strong> Acceptable - Likely transient network issues</li>
+            <li><strong>0.1-1%:</strong> Concerning - Intermittent issue present</li>
+            <li><strong>> 1%:</strong> Critical - Systemic LTPA or DASH issue</li>
+        </ul>
+
+        <h3 style="font-size: 16px; margin: 20px 0 10px 0;">Response Time Guidelines:</h3>
+        <ul style="margin-left: 20px;">
+            <li><strong>P95 < 500ms:</strong> Good performance</li>
+            <li><strong>P95 500-1000ms:</strong> Acceptable</li>
+            <li><strong>P95 > 1000ms:</strong> Performance issue - investigate slow queries or backends</li>
+        </ul>
+
+        <h3 style="font-size: 16px; margin: 20px 0 10px 0;">Next Steps:</h3>
+        <ul style="margin-left: 20px;">
+            <li>If failures detected: Use command-line correlation tool with failure timestamps</li>
+            <li>Check WebSphere SystemOut.log for LTPA errors during test window</li>
+            <li>Run clock skew detector to check time synchronization</li>
+            <li>For larger tests (>100 requests): Use command-line stress tester</li>
+        </ul>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
