@@ -8,7 +8,6 @@
 # Usage:
 #   ./run_diagnostics.sh --mode <quick|full|stress|investigate>
 #
-# Author: Claude Code
 # Version: 1.0
 ################################################################################
 
